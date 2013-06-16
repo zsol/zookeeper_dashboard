@@ -1,11 +1,14 @@
-from django.shortcuts import render_to_response
 import string
+
+from django.shortcuts import render_to_response
 
 from zookeeper_dashboard.zktree.models import ZNode
 
 def istext(s, text_chars=''.join(map(chr, range(32, 127))) + '\n\r\t\b'):
-    if '\0' in s: return False
-    if not s: return True
+    if '\0' in s:
+        return False
+    if not s:
+        return True
     t = s.translate(string.maketrans('', ''), text_chars)
     return len(t) == 0
 

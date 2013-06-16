@@ -14,7 +14,7 @@ class Session(object):
         self.port = m.group(2)
         self.interest_ops = m.group(3)
         for d in m.group(4).split(','):
-            k,v = d.split('=')
+            k, v = d.split('=')
             self.__dict__[k] = v
 
 class ZKServer(object):
