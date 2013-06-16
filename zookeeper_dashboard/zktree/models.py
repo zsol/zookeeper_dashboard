@@ -55,6 +55,6 @@ class ZNode(object):
             self.data, stat = zk_client.get(path)
             self.stat = _convert_stat(stat)
             self.children = zk_client.get_children(path) or []
-            self.acl = _convert_acls(zk_client.get_acls(path)[0])
+            self.acls = _convert_acls(zk_client.get_acls(path)[0])
         finally:
             zk_client.stop()
