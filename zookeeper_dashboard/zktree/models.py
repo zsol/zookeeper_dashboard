@@ -14,40 +14,48 @@ TIMEOUT = 10.0
 
 ZOOKEEPER_SERVERS = getattr(settings,'ZOOKEEPER_SERVERS')
 
+def _convert_stat(stat):
+    rtv = {}
+    for k in dir(stat):
+        if k.startswith('_'):
+            continue
+        v = getattr(stat, k)
+        if k in ['ctime', 'mtime']:
+            rtv[k] = datetime.fromtimestamp(v/1000)
+        else:
+            rtv[k] = v
+    return rtv
+
+def _convert_acls(acls):
+    rtv = []
+    for acl in acls:
+        perms = acl.perms
+        perms_list = []
+        if perms & PERM_READ:
+            perms_list.append('PERM_READ')
+        if perms & PERM_WRITE:
+            perms_list.append('PERM_WRITE')
+        if perms & PERM_CREATE:
+            perms_list.append('PERM_CREATE')
+        if perms & PERM_DELETE:
+            perms_list.append('PERM_DELETE')
+        if perms & PERM_ADMIN:
+            perms_list.append('PERM_ADMIN')
+        if perms & PERM_ALL == PERM_ALL:
+            perms_list = ['PERM_ALL']
+        rtv.append({'scheme': acl.id.scheme, 'id': acl.id.id, 'perm_list': perms_list})
+    return rtv
+
 class ZNode(object):
     def __init__(self, path='/'):
         self.path = path
+
         zk =  KazooClient(hosts=ZOOKEEPER_SERVERS, read_only=True, timeout=TIMEOUT)
         try:
             zk.start()
             self.data, stat = zk.get(path)
-            self.stat = {}
-            for k in dir(stat):
-                if k.startswith('_'):
-                    continue
-                v = getattr(stat, k)
-                if k in ['ctime', 'mtime']:
-                    self.stat[k] = datetime.fromtimestamp(v/1000)
-                else:
-                    self.stat[k] = v
+            self.stat = _convert_stat(stat)
             self.children = zk.get_children(path) or []
-            self.acls = []
-            acls = zk.get_acls(path)[0] or []
-            for acl in acls:
-                perms = acl.perms
-                perms_list = []
-                if perms & PERM_READ:
-                    perms_list.append('PERM_READ')
-                if perms & PERM_WRITE:
-                    perms_list.append('PERM_WRITE')
-                if perms & PERM_CREATE:
-                    perms_list.append('PERM_CREATE')
-                if perms & PERM_DELETE:
-                    perms_list.append('PERM_DELETE')
-                if perms & PERM_ADMIN:
-                    perms_list.append('PERM_ADMIN')
-                if perms & PERM_ALL == PERM_ALL:
-                    perms_list = ['PERM_ALL']
-                self.acls.append({'scheme': acl.id.scheme, 'id': acl.id.id, 'perm_list': perms_list})
+            self.acl = _convert_acls(zk.get_acls(path)[0])
         finally:
             zk.stop()
