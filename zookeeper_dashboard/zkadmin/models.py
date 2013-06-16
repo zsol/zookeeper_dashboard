@@ -9,7 +9,7 @@ OP_ACCEPT = 16
 
 class Session(object):
     def __init__(self, session):
-        m = re.search('/(\d+\.\d+\.\d+\.\d+):(\d+)\[(\d+)\]\((.*)\)', session)
+        m = re.search(r'/(\d+\.\d+\.\d+\.\d+):(\d+)\[(\d+)\]\((.*)\)', session)
         self.host = m.group(1)
         self.port = m.group(2)
         self.interest_ops = m.group(3)
@@ -31,7 +31,7 @@ class ZKServer(object):
 
         sio = StringIO.StringIO(stat)
         line = sio.readline()
-        m = re.search('.*: (\d+\.\d+\.\d+)-.*', line)
+        m = re.search(r'.*: (\d+\.\d+\.\d+)-.*', line)
         self.version = m.group(1)
         sio.readline()
         self.sessions = []
