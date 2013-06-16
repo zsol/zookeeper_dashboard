@@ -13,8 +13,8 @@ class Session(object):
         self.host = m.group(1)
         self.port = m.group(2)
         self.interest_ops = m.group(3)
-        for d in m.group(4).split(","):
-            k,v = d.split("=")
+        for d in m.group(4).split(','):
+            k,v = d.split('=')
             self.__dict__[k] = v
 
 class ZKServer(object):
@@ -24,9 +24,9 @@ class ZKServer(object):
             stat = self.send_cmd('stat\n')
             envi = self.send_cmd('envi\n')
         except:
-            self.mode = "Unavailable"
+            self.mode = 'Unavailable'
             self.sessions = []
-            self.version = "Unknown"
+            self.version = 'Unknown'
             return
 
         sio = StringIO.StringIO(stat)
@@ -41,16 +41,16 @@ class ZKServer(object):
             self.sessions.append(Session(line.strip()))
         for line in sio:
             attr, value = line.split(':')
-            attr = attr.strip().replace(" ", "_").replace("/", "_").lower()
+            attr = attr.strip().replace(' ', '_').replace('/', '_').lower()
             self.__dict__[attr] = value.strip()
 
-        self.min_latency, self.avg_latency, self.max_latency = self.latency_min_avg_max.split("/")
+        self.min_latency, self.avg_latency, self.max_latency = self.latency_min_avg_max.split('/')
 
         self.envi = []
         sio = StringIO.StringIO(envi)
         for line in sio:
             if not line.strip(): break
-            attr, equ, value = line.partition("=")
+            attr, equ, value = line.partition('=')
             if not equ: continue
             self.envi.append((attr, value))
 
