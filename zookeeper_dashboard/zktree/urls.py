@@ -1,6 +1,6 @@
-from django.conf.urls.defaults import *
+from django.conf.urls import patterns
 
 urlpatterns = patterns('zookeeper_dashboard.zktree.views',
-    (r'^(?P<path>.*)/$','index'), 
-    (r'^$','index'), 
+    (r'^(?P<path>.*)/$','index'),
+    (r'^$','index'),
 )
