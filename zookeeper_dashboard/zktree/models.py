@@ -12,18 +12,18 @@ PERM_ALL = PERM_READ | PERM_WRITE | PERM_CREATE | PERM_DELETE | PERM_ADMIN
 
 TIMEOUT = 10.0
 
-ZOOKEEPER_SERVERS = getattr(settings,'ZOOKEEPER_SERVERS')
+ZOOKEEPER_SERVERS = getattr(settings, 'ZOOKEEPER_SERVERS')
 
 def _convert_stat(stat):
     rtv = {}
-    for k in dir(stat):
-        if k.startswith('_'):
+    for key in dir(stat):
+        if key.startswith('_'):
             continue
-        v = getattr(stat, k)
-        if k in ['ctime', 'mtime']:
-            rtv[k] = datetime.fromtimestamp(v/1000)
+        value = getattr(stat, key)
+        if key in ['ctime', 'mtime']:
+            rtv[key] = datetime.fromtimestamp(value / 1000)
         else:
-            rtv[k] = v
+            rtv[key] = value
     return rtv
 
 def _convert_acls(acls):
@@ -49,13 +49,12 @@ def _convert_acls(acls):
 class ZNode(object):
     def __init__(self, path='/'):
         self.path = path
-
-        zk =  KazooClient(hosts=ZOOKEEPER_SERVERS, read_only=True, timeout=TIMEOUT)
+        zk_client =  KazooClient(hosts=ZOOKEEPER_SERVERS, read_only=True, timeout=TIMEOUT)
         try:
-            zk.start()
-            self.data, stat = zk.get(path)
+            zk_client.start()
+            self.data, stat = zk_client.get(path)
             self.stat = _convert_stat(stat)
-            self.children = zk.get_children(path) or []
-            self.acl = _convert_acls(zk.get_acls(path)[0])
+            self.children = zk_client.get_children(path) or []
+            self.acl = _convert_acls(zk_client.get_acls(path)[0])
         finally:
-            zk.stop()
+            zk_client.stop()
